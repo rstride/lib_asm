@@ -1,45 +1,40 @@
-# Name of the library and executable
-LIB_NAME = libasm.a
-EXE_NAME = main
+NAME = libasm.a
 
-# Compiler and flags
-CC = gcc
+SRC = src/ft_strlen.s src/ft_strcpy.s src/ft_strcmp.s src/ft_write.s src/ft_read.s src/ft_strdup.s
+BONUS_SRC = src_bonus/ft_atoi_base.s src_bonus/ft_list_push_front.s src_bonus/ft_list_size.s src_bonus/ft_list_sort.s src_bonus/ft_list_remove_if.s
+
+OBJ = $(SRC:.s=.o)
+BONUS_OBJ = $(BONUS_SRC:.s=.o)
+
 NASM = nasm
-NASM_FLAGS = -f macho64
+NASMFLAGS = -f elf64
+
+CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 
-# Source and object files
-ASM_SRC = ft_strlen.s
-ASM_OBJ = $(ASM_SRC:.s=.o)
-C_SRC = main.c
-C_OBJ = $(C_SRC:.c=.o)
+all: $(NAME)
 
-# Default rule
-all: $(LIB_NAME) $(EXE_NAME)
+$(NAME): $(OBJ)
+	ar rcs $(NAME) $(OBJ)
 
-# Rule to compile assembly files
+bonus: $(BONUS_OBJ)
+	ar rcs $(NAME) $(BONUS_OBJ)
+
 %.o: %.s
-	$(NASM) $(NASM_FLAGS) $<
+	$(NASM) $(NASMFLAGS) $< -o $@
 
-# Rule to compile C files
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Rule to create the library
-$(LIB_NAME): $(ASM_OBJ)
-	ar rcs $(LIB_NAME) $(ASM_OBJ)
-
-# Rule to create the executable
-$(EXE_NAME): $(C_OBJ) $(LIB_NAME)
-	$(CC) $(CFLAGS) $(C_OBJ) -L. -lasm -o $(EXE_NAME)
-
-# Rule to clean object files
 clean:
-	rm -f $(ASM_OBJ) $(C_OBJ)
+	rm -f $(OBJ)
 
-# Rule to clean everything
 fclean: clean
-	rm -f $(LIB_NAME) $(EXE_NAME)
+	rm -f $(NAME) a.out
 
-# Rule to recompile
 re: fclean all
+
+test: all
+	$(CC) $(CFLAGS) main.c $(NAME) -o test_program
+
+test_bonus: bonus
+	$(CC) $(CFLAGS) main_bonus.c $(NAME) -o test_program_bonus
+
+.PHONY: all clean fclean re test test_bonus
