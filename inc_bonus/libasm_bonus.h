@@ -1,5 +1,5 @@
-#ifndef _LIBASM_H
-#define _LIBASM_H
+#ifndef _LIBASM_BONUS_H
+#define _LIBASM_BONUS_H
 
 #include <stdio.h>
 #include <string.h>

@@ -24,7 +24,7 @@ bonus: $(BONUS_OBJ)
 	$(NASM) $(NASMFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) $(BONUS_OBJ)
 
 fclean: clean
 	rm -f $(NAME) a.out
