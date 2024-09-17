@@ -13,6 +13,7 @@ ft_read:
 
 .error:
     mov rdi, rax        ; Set errno to the return value (negative error code)
-    call ___error       ; Get address of errno
-    mov [rax], edi      ; Set errno
-    ret                 ; Return with the error code
+    neg rdi             ; Negate the error code
+    mov rax, 60         ; System call number for exit (60)
+    syscall             ; Exit the program with the error code
+    ret
