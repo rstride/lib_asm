@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <fcntl.h>
 
 typedef struct s_list
 {
@@ -19,7 +20,7 @@ int     ft_strcmp(const char *s1, const char *s2);
 ssize_t ft_write(int fd, const void *buf, size_t count);
 ssize_t ft_read(int fd, void *buf, size_t count);
 char    *ft_strdup(const char *s1);
-int     ft_atoi_base(const char *str, int base);
+int     ft_atoi_base(const char *str, const char *base);
 void    ft_list_push_front(t_list **list, void *data);
 int     ft_list_size(t_list *list);
 void    ft_list_sort(t_list **list, int (*cmp)(void *, void *));

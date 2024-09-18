@@ -1,19 +1,14 @@
-global ft_write
 section .text
+    global _ft_write
 
-ft_write:
-    mov rax, 1          ; System call number for write (1)
-    mov rdi, rdi        ; File descriptor (first argument)
-    mov rsi, rsi        ; Buffer (second argument)
-    mov rdx, rdx        ; Number of bytes to write (third argument)
-    syscall             ; Invoke system call
-    cmp rax, 0          ; Check if syscall was successful
-    js .error           ; If there was an error (negative return), jump to error
-    ret                 ; Return number of bytes written
+; ft_write (rdi, rsi, rdx)
 
-.error:
-    mov rdi, rax        ; Set errno to the return value (negative error code)
-    neg rdi             ; Negate the error code
-    mov rax, 60         ; System call number for exit (60)
-    syscall             ; Exit the program with the error code
+_ft_write:
+    mov rax, 1              ; system call number for sys_write
+    syscall                 ; call to write function
+    jc error                ; if (CF == 1) return (error)
+    ret                     ; if (CF == 0) return (exit)
+
+error:
+    mov rax, -1             ; -1 => system call error
     ret

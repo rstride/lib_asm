@@ -1,20 +1,26 @@
-global ft_strcmp
 section .text
+    global _ft_strcmp
 
-ft_strcmp:
-.loop:
-    mov al, [rdi]       ; Load byte from string1
-    mov bl, [rsi]       ; Load byte from string2
-    cmp al, bl          ; Compare the two bytes
-    jne .not_equal      ; If not equal, jump to not equal
-    test al, al         ; Check if the end of the string is reached
-    je .equal           ; If equal and end of string, return 0
-    inc rdi             ; Move to next byte in string1
-    inc rsi             ; Move to next byte in string2
-    jmp .loop           ; Repeat loop
-.not_equal:
-    sub eax, ebx        ; Return the difference between the two bytes
-    ret
-.equal:
-    xor eax, eax        ; If equal, return 0
-    ret
+_ft_strcmp:
+    xor rax, rax            ; char c = NULL
+    xor rbx, rbx            ; char h = NULL
+    jmp loop                ; jump to loop
+
+loop:
+    mov al, BYTE [rdi]      ; c = *dest
+    mov bl, BYTE [rsi]      ; h = *src
+    cmp al, 0               ; if (c == \0)
+    je exit                 ; return ()
+    cmp bl, 0               ; if (h == \0)
+    je exit                 ; return ()
+    cmp al, bl              ; if (c != h)
+    jne exit                ; reutrn ()
+    inc rdi                 ; *dest++
+    inc rsi                 ; *src
+    jmp loop                ; jump to loop
+
+exit:
+    movzx rax, al           ; move from low registr (al) to 64-x registr (rax) with 0 byte
+    movzx rbx, bl           ; move from low registr (bl) to 64-x registr (rbx) with 0 byte
+    sub rax, rbx            ; temp = (c - h)
+    ret                     ; return (temp)

@@ -1,18 +1,20 @@
-global ft_list_size
 section .text
+        global _ft_list_size
 
-ft_list_size:
-    ; Input: rdi = pointer to the list
-    ; Output: rax = number of elements in the list
+; list == 8 bit 
 
-    xor rax, rax        ; Clear rax to count elements
+_ft_list_size:
+        mov rsi, rdi            ; save pointer list
+        xor rax, rax            ; rax = 0
+        jmp loop                ; jump to loop
 
-.count_loop:
-    cmp rdi, 0          ; Check if the list is empty (end of the list)
-    je .done
-    inc rax             ; Increment count
-    mov rdi, [rdi + 8]  ; Move to the next element in the list
-    jmp .count_loop     ; Repeat until the end of the list
+loop:
+        cmp rdi, 0              ; if (list->next == NULL)
+        je exit                 ; return (rax)
+        inc rax                 ; rax++
+        mov rdi, [rdi + 8]      ; list->next
+        jmp loop                ; jump to loop
 
-.done:
-    ret
+exit:
+        mov rdi, rsi            ; return saved pointer
+        ret                     ; return (rax)

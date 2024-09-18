@@ -1,40 +1,40 @@
 NAME = libasm.a
+FLAGS = -Wall -Wextra -Werror
+SRC = ./src/ft_strlen.s ./src/ft_strcpy.s ./src/ft_strcmp.s ./src/ft_write.s ./src/ft_read.s ./src/ft_strdup.s
+BONUS = ./src_bonus/ft_list_size.s ./src_bonus/ft_list_push_front.s ./src_bonus/ft_atoi_base.s ./src_bonus/ft_list_sort.s ./src_bonus/ft_list_remove_if.s
+OBJ = $(SRC:%.s=%.o)
+OBJ_BONUS = $(BONUS:%.s=%.o)
+CC = clang
 
-SRC = src/ft_strlen.s src/ft_strcpy.s src/ft_strcmp.s src/ft_write.s src/ft_read.s src/ft_strdup.s
-BONUS_SRC = src_bonus/ft_atoi_base.s src_bonus/ft_list_push_front.s src_bonus/ft_list_size.s src_bonus/ft_list_sort.s src_bonus/ft_list_remove_if.s
-
-OBJ = $(SRC:.s=.o)
-BONUS_OBJ = $(BONUS_SRC:.s=.o)
-
-NASM = nasm
-NASMFLAGS = -f elf64
-
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+%.o: %.s
+	@nasm -f elf64 $< -o $@ 
+	@echo "\033[90m[\033[32mOK\033[90m]\033[33m Compiling $<\033[0m"
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	ar rcs $(NAME) $(OBJ)
+	@ar -rc $(NAME) $(OBJ)
+	@ranlib $(NAME)  # Ensure ranlib is applied to create the index
+	@echo "\033[90m[\033[32mSuccess\033[90m]\033[32m Successfully compiled libasm.a .\033[0m"
 
-bonus: $(BONUS_OBJ)
-	ar rcs $(NAME) $(BONUS_OBJ)
+bonus: all $(OBJ_BONUS)
+	@ar -rc $(NAME) $(OBJ_BONUS)
+	@ranlib $(NAME)  # Apply ranlib after the bonus compilation
+	@echo "\033[90m[\033[32mSuccess\033[90m]\033[32m Successfully compiled libasm.a with bonus.\033[0m"
 
-%.o: %.s
-	$(NASM) $(NASMFLAGS) $< -o $@
+test: bonus
+	@$(CC) main.c $(NAME) $(FLAGS)
+	@echo "\033[90m[\033[32mSuccess\033[90m]\033[32m Successfully compiled test's .\033[0m"
 
 clean:
-	rm -f $(OBJ) $(BONUS_OBJ)
+	@$(RM) $(OBJ) $(OBJ_BONUS)
+	@echo "\033[90m[\033[91mDeleting\033[90m]\033[31m Object files deleted\033[0m"
 
 fclean: clean
-	rm -f $(NAME) a.out
+	@$(RM) $(NAME) a.out
+	@echo "\033[90m[\033[91mDeleting\033[90m]\033[31m libasm.a deleted.\033[0m"
+	@echo "\033[90m[\033[91mDeleting\033[90m]\033[31m test deleted.\033[0m"
 
-re: fclean all
+re: fclean bonus test
 
-test: all
-	$(CC) $(CFLAGS) main.c $(NAME) -o test_program
-
-test_bonus: bonus
-	$(CC) $(CFLAGS) main_bonus.c $(NAME) -o test_program_bonus
-
-.PHONY: all clean fclean re test test_bonus
+.PHONY: all test clean fclean re bonus

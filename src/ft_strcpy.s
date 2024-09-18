@@ -1,13 +1,23 @@
-global ft_strcpy
 section .text
+    global _ft_strcpy
 
-ft_strcpy:
-    mov rax, rdi        ; Save destination address in RAX (return value)
-.loop:
-    mov al, [rsi]       ; Load byte from source string
-    mov [rdi], al       ; Store byte in destination string
-    inc rsi             ; Move to the next byte in source
-    inc rdi             ; Move to the next byte in destination
-    test al, al         ; Check if byte is the null terminator
-    jne .loop           ; If not, continue loop
-    ret                 ; Return the destination address
+; rdi = dest, rsi = src
+
+_ft_strcpy:
+    push rdi                ; Save the destination pointer
+    jmp loop                ; Jump to loop
+
+loop:
+    cmp BYTE [rsi], 0       ; Compare src byte with 0
+    je exit                 ; If src byte is 0, jump to exit
+    mov al, [rsi]           ; Load byte from src into al
+    mov [rdi], al           ; Store byte into dest
+    inc rdi                 ; Increment dest pointer
+    inc rsi                 ; Increment src pointer
+    jmp loop                ; Repeat the loop
+
+exit:
+    mov BYTE [rdi], 0       ; Null-terminate the destination string
+    pop rax                 ; Restore the original destination pointer
+    mov rax, rdi            ; Set the return value to the destination pointer
+    ret                     ; Return

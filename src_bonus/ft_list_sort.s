@@ -1,42 +1,51 @@
-global ft_list_sort
 section .text
+	global _ft_list_sort
 
-ft_list_sort:
-    ; Input: rdi = pointer to the list, rsi = comparison function
-    ; Output: None
-    ; This function will sort the linked list in place using bubble sort
+; void	ft_list_sort(t_list **begin_list, int (*cmp)());
+; rdi = **begin_list rsi = (*cmp)
 
-    mov rdx, 0          ; Used to track if any swaps were made
+_ft_list_sort:
+    push r12            ; r12 => stack
+    push r13            ; r13 => stack
+    cmp rsi, 0          ; if (!(*cmp))
+    je exit             ; return (exit)
+    mov r11, [rdi]      ; move *begin_list => r11 registr
+    cmp r11, 0          ; if (*begin_list == NULL)
+    je exit             ; return (exit)
+    mov r12, rsi        ; move (*cmp) => r12 registr
+    mov r13, [r11 + 8]  ; move next list in r13 registr
+    jmp loop            ; jump to loop
 
-.sort_loop:
-    mov rax, [rdi]      ; rax points to the first element
-    mov rbx, rax        ; rbx is used to traverse the list
+loop:
+    cmp r13, 0          ; if (tmp == NULL)
+    je inc_list         ; return (exit)
+    mov rdi, [r11]      ; rdi = begin_list->data
+    mov rsi, [r13]      ; rsi = tmp->data
+    call r12            ; *cmp(rdi, rsi)
+    cmp rax, 0          ; if (return > 0)
+    jg swap_list        ; swap list
+    jmp inc_tmp         ; jump to inc_tmp
 
-.check_next:
-    cmp [rbx + 8], 0    ; Check if next element is NULL
-    je .sort_done
-    mov rcx, [rbx + 8]  ; rcx points to the next element
+inc_list:
+    mov r11, [r11 + 8]  ; begin_list = begin_list->next
+    cmp r11, 0          ; if (begin_list == 0)
+    je exit             ; return (exit)
+    mov r13, [r11 + 8]  ; tmp = tmp->next
+    jmp loop            ; jump to loop
 
-    ; Call the comparison function
-    mov rdi, rbx        ; First argument
-    mov rsi, rcx        ; Second argument
-    call [rsi]          ; Call the comparison function
+; swap list r11 r13 with temp r8 and r9
+swap_list:
+    mov r8, [r11]
+    mov r9, [r13]
+    mov [r11], r9
+    mov [r13], r8
+    jmp inc_tmp
 
-    cmp rax, 0          ; If result > 0, we need to swap
-    jle .skip_swap
-
-    ; Swap elements
-    mov rdx, [rcx + 8]  ; Load next->next
-    mov [rbx + 8], rdx  ; Set b->next = next->next
-    mov [rcx + 8], rbx  ; Set next->next = b
-    mov rbx, rcx        ; Move to next element
-    mov rdx, 1          ; Indicate a swap was made
-
-.skip_swap:
-    mov rbx, [rbx + 8]  ; Move to the next element in the list
-    jmp .check_next     ; Continue checking
-
-.sort_done:
-    cmp rdx, 0          ; If a swap was made, repeat the sorting
-    jne .sort_loop
-    ret
+inc_tmp:
+    mov r13, [r13 + 8]  ; tmp = tmp->next
+    jmp loop            ; jump to loop
+    
+exit:
+    pop r13             ; r13 <= stack
+    pop r12             ; r12 <= stack
+    ret                 ; return (exit)

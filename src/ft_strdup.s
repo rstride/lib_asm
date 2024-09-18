@@ -1,24 +1,32 @@
-global ft_strdup
-extern malloc
-extern ft_strlen
-extern ft_strcpy
 section .text
+        global _ft_strdup
+        extern _malloc
+        extern _ft_strlen
+        extern _ft_strcpy
 
-ft_strdup:
-    mov rdi, rsi        ; Save source string in RDI
-    call ft_strlen      ; Get the length of the source string
-    inc rax             ; Add space for null terminator
-    mov rdi, rax        ; Set the size for malloc
-    call malloc         ; Allocate memory
-    test rax, rax       ; Check if malloc was successful
-    je .error           ; If malloc failed, jump to error
-    mov rdi, rax        ; Set the destination pointer (return value)
-    mov rsi, rsi        ; Set the source pointer
-    call ft_strcpy      ; Copy the string
-    ret                 ; Return the pointer to the duplicated string
+; ft_strdup(const char *str)
+; str = rdi
 
-.error:
-    mov rdi, -1         ; Set return value to -1 for error
-    call ___error       ; Get address of errno
-    mov [rax], edi      ; Set errno
-    ret                 ; Return null on failure
+_ft_strdup:
+    xor rax, rax        ; rax = 0
+    cmp rdi, 0          ; if (*str == NULL)
+    je exit             ; return (exit)
+    push rdi            ; rdi => stack
+    call _ft_strlen     ; return size in rax
+    mov rdi, rax        ; rax in rdi
+    inc rdi             ; rdi++
+    call _malloc        ; allocate rax
+    cmp rax, 0          ; if (rax == NULL)
+    je error            ; return (error)
+    pop rsi             ; rsi <= stack
+    mov rdi, rax        ; move allocate rax to rdi
+    call _ft_strcpy     ; copy rsi to rdi return rax
+    jmp exit            ; jump to exit
+
+error:
+    xor rax, rax        ; rax = 0
+    mov rax, -1         ; call error => -1
+    ret                 ; return (rax)
+
+exit:
+    ret                 ; return (rax)
