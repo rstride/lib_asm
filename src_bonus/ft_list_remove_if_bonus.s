@@ -28,80 +28,80 @@ global ft_list_remove_if
 extern free
 
 %macro SAVE_ARGS 0
-	push rdi				; [rsp + 24]	= **begin_list
-	push rsi				; [rsp + 16]	= *data_ref
-	push rdx				; [rsp + 8]		= (*cmp)()
-	push rcx				; [rsp]			= (*free_fct)(void *)
+	push rdi				; Save **begin_list
+	push rsi				; Save *data_ref
+	push rdx				; Save (*cmp)()
+	push rcx				; Save (*free_fct)(void *)
 %endmacro
 
 %macro SAVE_VARS 0
-	push r8					; pushin r8
-	push r9					; pushin r9
-	sub rsp, 8				; aligning stack
+	push r8					; Save r8
+	push r9					; Save r9
+	sub rsp, 8				; Align stack
 %endmacro
 
 %macro GET_VARS 0
-	add rsp, 8				; remove alignment
-	pop r9					; poping r9
-	pop r8					; poping r8
+	add rsp, 8				; Remove alignment
+	pop r9					; Restore r9
+	pop r8					; Restore r8
 %endmacro
 
 %macro EMPTY_STACK 0
-	pop rcx
-	pop rdx
-	pop rsi
-	pop rdi
+	pop rcx				; Restore rcx
+	pop rdx				; Restore rdx
+	pop rsi				; Restore rsi
+	pop rdi				; Restore rdi
 %endmacro
 
 section .text
 ft_list_remove_if:
 	SAVE_ARGS
-	cmp [rsp + 24], word 0	; if **begin_list == NULL
-	je return				; goto return
-	cmp [rsp + 8], word 0	; if (*cmp)() == NULL
-	je return				; goto return
-	cmp [rsp], word 0		; if (*free_fct) (void *) == NULL
-	je return				; goto return
+	cmp [rsp + 24], word 0	; Check if **begin_list is NULL
+	je return				; If NULL, return
+	cmp [rsp + 8], word 0	; Check if (*cmp)() is NULL
+	je return				; If NULL, return
+	cmp [rsp], word 0		; Check if (*free_fct)(void *) is NULL
+	je return				; If NULL, return
 	mov r8, [rdi]			; r8 = *begin_list
 	mov r9, 0				; r9 = NULL (prev)
 loop:
-	cmp r8, 0				; if *list == NULL
-	je return				; goto return	
+	cmp r8, 0				; Check if *list is NULL
+	je return				; If NULL, return	
 	mov rdi, [r8]			; rdi = list->data
 	mov rsi, [rsp + 16]		; rsi = data_ref
 	SAVE_VARS
-	call [rsp + 32]			; cmp(list->data, data_ref)
+	call [rsp + 32]			; Call cmp(list->data, data_ref)
 	GET_VARS
-	cmp rax, 0				; if list->data == data_ref
-	je remove				; goto remove
+	cmp rax, 0				; Check if list->data == data_ref
+	je remove				; If equal, remove
 	mov r9, r8				; r9 = prev
 	mov r8, [r8 + 8]		; list = list->next
-	jmp loop				; goto loop
+	jmp loop				; Repeat loop
 
 remove:
-	cmp r9, 0				; if prev == NULL
-	je noPrev				; goto noPrev
+	cmp r9, 0				; Check if prev is NULL
+	je noPrev				; If NULL, handle no previous node
 	mov r10, [r8 + 8]		; r10 = list->next
 	mov [r9 + 8], r10		; prev->next = list->next
-	jmp freeDataAndItem		; free list item
+	jmp freeDataAndItem		; Free list item
 
 noPrev:
 	mov r10, [r8 + 8]		; r10 = list->next
 	mov r11, [rsp + 24]		; r11 = **begin_list
 	mov [r11], r10			; *begin_list = list->next
-	jmp freeDataAndItem		; free list item
+	jmp freeDataAndItem		; Free list item
 
 freeDataAndItem:
 	mov rdi, [r8]			; rdi = list->data
 	SAVE_VARS
-	call [rsp + 24]			; free_fct(list->data);
+	call [rsp + 24]			; Call free_fct(list->data)
 	GET_VARS
 	mov rdi, r8				; rdi = list
 	mov r8, [r8 + 8]		; r8 = list->next
 	SAVE_VARS
-	call free				; free(list);
+	call free				; Call free(list)
 	GET_VARS
-	jmp loop				; goto loop
+	jmp loop				; Repeat loop
 
 return:
 	EMPTY_STACK

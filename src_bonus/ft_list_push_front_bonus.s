@@ -1,7 +1,7 @@
 ; void ft_list_push_front(t_list **begin_list, void *data)
-;	**begin_lst	->	rdi
-;	*data		->	rsi
-;	return val	->	rax
+;	**begin_list	->	rdi
+;	*data			->	rsi
+;	return value	->	rax
 
 ;	typedef struct s_list {
 ;		void			*data;
@@ -17,16 +17,16 @@ extern malloc
 
 section .text
 ft_list_push_front:
-	cmp rdi, 0				; if **begin_lst == null
-	je ret_null				; goto ret_null
-	push rdi				; pushing **begin_list into stack
-	push rsi				; pushing *data into stack
+	cmp rdi, 0				; if **begin_list == NULL
+	je ret_null				; jump to ret_null if NULL
+	push rdi				; push **begin_list onto stack
+	push rsi				; push *data onto stack
 	mov rdi, 16				; rdi = 16 (sizeof(t_list))
-	call malloc				; malloc(sizeof(t_list))
-	cmp rax, 0				; if malloc = NULL
-	je ret_null				; goto ret_null
-	pop rsi					; rsi = *data
-	pop rdi					; rdi = **begin_list
+	call malloc				; call malloc to allocate memory for t_list
+	cmp rax, 0				; if malloc returned NULL
+	je ret_null				; jump to ret_null if NULL
+	pop rsi					; pop *data from stack into rsi
+	pop rdi					; pop **begin_list from stack into rdi
 	mov [rax], rsi			; new->data = data
 	mov rdx, [rdi]			; rdx = *begin_list
 	mov [rax + 8], rdx		; new->next = *begin_list
@@ -35,6 +35,6 @@ ft_list_push_front:
 
 ret_null:
 	mov rax, 0				; rax = 0
-	ret						; return rax (0)
+	ret						; return 0
 
 section .note.GNU-stack noalloc noexec nowrite progbits

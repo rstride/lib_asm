@@ -10,23 +10,23 @@ extern __errno_location
 
 section .text
 ft_strdup:
-	push rdi				; save s into stack
-	call ft_strlen			; rax = ft_strlen(*s) (len)
-	inc rax					; rax++ (len++)
-	mov rdi, rax			; rdi = len+1
-	call malloc				; malloc (len+1) (for \0 at end of string)
-	cmp rax, 0				; if (rax == 0 (NULL)) (rax is the return of malloc)
-	je error				; goto error
-	mov rdi, rax			; rdi = alloced ptr
-	pop rsi					; rsi = s
-	sub rsp, 8				; aligning stack
-	call ft_strcpy			; rax = ft_strcpy(rdi, rsi) (ft_strcpy(ptr, s))
-	add rsp, 8				; remove alignment
-	ret						; return rax (ptr)
+	push rdi				; Save the input string pointer (s) onto the stack
+	call ft_strlen			; Get the length of the string (len) and store it in rax
+	inc rax					; Increment the length to account for the null terminator
+	mov rdi, rax			; Set rdi to the length + 1
+	call malloc				; Allocate memory of size (len + 1)
+	cmp rax, 0				; Check if malloc returned NULL
+	je error				; If malloc returned NULL, jump to error handling
+	mov rdi, rax			; Set rdi to the allocated memory pointer
+	pop rsi					; Restore the input string pointer (s) from the stack into rsi
+	sub rsp, 8				; Align the stack
+	call ft_strcpy			; Copy the string from rsi to rdi, rax will hold the destination pointer
+	add rsp, 8				; Restore the stack alignment
+	ret						; Return the duplicated string pointer (rax)
 error:
-	call __errno_location	; rax = errno location
-	mov [rax], byte 12		; *rax = 12 (ENOMEM = 12)
-	mov rax, 0				; rax = 0
-	ret						; return rax (NULL)
+	call __errno_location	; Get the address of errno
+	mov [rax], byte 12		; Set errno to ENOMEM (12)
+	mov rax, 0				; Set the return value to NULL
+	ret						; Return NULL
 
 section .note.GNU-stack noalloc noexec nowrite progbits

@@ -1,5 +1,5 @@
 ; int ft_list_size(t_list *begin_list)
-;	*begin_lst	->	rdi
+;	*begin_list	->	rdi
 ;	return val	->	rax
 
 ;	typedef struct s_list {
@@ -15,14 +15,14 @@ global ft_list_size
 
 section .text
 ft_list_size:
-	xor rax, rax;			; rax = 0
+	xor rax, rax            ; Initialize rax to 0 (list size counter)
 loop:
-	cmp rdi, 0				; if lst == null
-	je return				; goto return
-	inc rax					; rax++
-	mov rdi, [rdi + 8]		; lst = lst->next
-	jmp loop				; goto loop
+	cmp rdi, 0              ; Check if the current node is NULL
+	je return               ; If NULL, jump to return
+	inc rax                 ; Increment the list size counter
+	mov rdi, [rdi + 8]      ; Move to the next node (rdi = rdi->next)
+	jmp loop                ; Repeat the loop
 return:
-	ret						; return rax
+	ret                     ; Return the list size (rax)
 
 section .note.GNU-stack noalloc noexec nowrite progbits

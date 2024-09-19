@@ -1,47 +1,47 @@
 ; int ft_atoi_base(char *str, char *base);
 ;	*str		->	rdi
 ;	*base		->	rsi
-;	return val	-.	rax
+;	return val	->	rax
 
 %macro check_forbidden 1
-	cmp byte [%1], '+'					; if *base == '+'
-	je error							; goto error
-	cmp byte [%1], '-'					; if *base == '-'
-	je error							; goto error
-	cmp byte [%1], 9					; if *base == '\t'
-	je error							; goto error
-	cmp byte [%1], 10					; if *base == '\n'
-	je error							; goto error
-	cmp byte [%1], 11					; if *base == '\v'
-	je error							; goto error
-	cmp byte [%1], 12					; if *base == '\f'
-	je error							; goto error
-	cmp byte [%1], 13					; if *base == '\r'
-	je error							; goto error
-	cmp byte [%1], ' '					; if *base == ' '
-	je error							; goto error
+	cmp byte [%1], '+'					; if base[i] == '+'
+	je error							; jump to error
+	cmp byte [%1], '-'					; if base[i] == '-'
+	je error							; jump to error
+	cmp byte [%1], 9					; if base[i] == '\t'
+	je error							; jump to error
+	cmp byte [%1], 10					; if base[i] == '\n'
+	je error							; jump to error
+	cmp byte [%1], 11					; if base[i] == '\v'
+	je error							; jump to error
+	cmp byte [%1], 12					; if base[i] == '\f'
+	je error							; jump to error
+	cmp byte [%1], 13					; if base[i] == '\r'
+	je error							; jump to error
+	cmp byte [%1], ' '					; if base[i] == ' '
+	je error							; jump to error
 %endmacro
 
 %macro check_sp 1
-	cmp byte [%1], 9					; if *str == '\t'
-	je inc_spaces						; goto inc_str
-	cmp byte [%1], 10					; if *str == '\n'
-	je inc_spaces						; goto inc_str
-	cmp byte [%1], 11					; if *str == '\v'
-	je inc_spaces						; goto inc_str
-	cmp byte [%1], 12					; if *str == '\f'
-	je inc_spaces						; goto inc_str
-	cmp byte [%1], 13					; if *str == '\r'
-	je inc_spaces						; goto inc_str
-	cmp byte [%1], ' '					; if *str == ' '
-	je inc_spaces						; goto inc_str
+	cmp byte [%1], 9					; if str[i] == '\t'
+	je inc_spaces						; jump to inc_spaces
+	cmp byte [%1], 10					; if str[i] == '\n'
+	je inc_spaces						; jump to inc_spaces
+	cmp byte [%1], 11					; if str[i] == '\v'
+	je inc_spaces						; jump to inc_spaces
+	cmp byte [%1], 12					; if str[i] == '\f'
+	je inc_spaces						; jump to inc_spaces
+	cmp byte [%1], 13					; if str[i] == '\r'
+	je inc_spaces						; jump to inc_spaces
+	cmp byte [%1], ' '					; if str[i] == ' '
+	je inc_spaces						; jump to inc_spaces
 %endmacro
 
 %macro check_pl_min 1
-	cmp byte[%1], '+'					; if *str == '+'
-	je inc_plus							; goto inc_plus
-	cmp byte[%1], '-'					; if *str == '-'
-	je inc_min							; goto inc_min
+	cmp byte[%1], '+'					; if str[i] == '+'
+	je inc_plus							; jump to inc_plus
+	cmp byte[%1], '-'					; if str[i] == '-'
+	je inc_min							; jump to inc_min
 %endmacro
 
 global ft_atoi_base
@@ -49,71 +49,71 @@ extern ft_strlen
 
 section .text
 ft_atoi_base:
-	xor r9, r9							; r9 = 0 (for counting nb of '-')
+	xor r9, r9							; r9 = 0 (counter for '-')
 check_spaces:
-	check_sp rdi						; check spaces of str
-	jmp check_plus_minus				; goto check_plus_minus
+	check_sp rdi						; check for spaces in str
+	jmp check_plus_minus				; jump to check_plus_minus
 inc_spaces:
 	inc rdi								; str++
-	jmp check_spaces					; goto check_spaces
+	jmp check_spaces					; jump to check_spaces
 check_plus_minus:
-	check_pl_min rdi					; check plus minus of str
-	jmp next							; goto next
+	check_pl_min rdi					; check for '+' or '-' in str
+	jmp next							; jump to next
 inc_plus:
 	inc rdi								; str++
-	jmp check_plus_minus				; goto check_plus_minus
+	jmp check_plus_minus				; jump to check_plus_minus
 inc_min:
 	inc rdi								; str++
-	inc r9								; nb of '-' ++
-	jmp check_plus_minus				; goto check_plus_minus
+	inc r9								; increment '-' counter
+	jmp check_plus_minus				; jump to check_plus_minus
 next:
-	mov r10, rdi						; r10 = *str
-	mov rdi, rsi						; rdi = *base (for ft_strlen)
+	mov r10, rdi						; r10 = str
+	mov rdi, rsi						; rdi = base
 	call ft_strlen						; rax = strlen(base)
-	cmp rax, 2							; if (rax < 2)
-	jl error							; goto error
-	mov rbx, -1							; rbx = 0
-	check_forbidden rdi					; check fornidden for base[0]
+	cmp rax, 2							; if strlen(base) < 2
+	jl error							; jump to error
+	mov rbx, -1							; rbx = -1
+	check_forbidden rdi					; check forbidden characters in base
 check_char:
 	inc rbx								; rbx++
-	cmp byte [rdi + rbx], 0				; if base[rbi] == 0
-	je convert							; goto convert
+	cmp byte [rdi + rbx], 0				; if base[rbx] == 0
+	je convert							; jump to convert
 	mov r8b, byte [rdi + rbx]			; r8b = base[rbx]
 	mov rcx, rbx						; rcx = rbx
-char_loop:								; checking duplicates...
+char_loop:								; check for duplicates
 	inc rcx								; rcx++
 	cmp byte [rdi + rcx], 0				; if base[rcx] == 0
-	je check_char						; goto check_char
+	je check_char						; jump to check_char
 	cmp r8b, byte [rdi + rcx]			; if base[rbx] == base[rcx]
-	je error							; goto error
-	check_forbidden rdi + rcx			; check forbidden for base[rcx]
-	jmp char_loop						; goto char_loop
+	je error							; jump to error
+	check_forbidden rdi + rcx			; check forbidden characters in base
+	jmp char_loop						; jump to char_loop
 convert:
-	xor rbx, rbx						; rbx = 0 (str[rbx])
-	xor rcx, rcx						; rcx = 0 (base[rcx])
+	xor rbx, rbx						; rbx = 0 (index for str)
+	xor rcx, rcx						; rcx = 0 (index for base)
 	mov r11, rax						; r11 = strlen(base)
-	xor rax, rax						; rax = 0
+	xor rax, rax						; rax = 0 (result)
 	mov r8b, byte [r10 + rbx]			; r8b = str[rbx]
 loop_base:
-	cmp r8b, byte [rdi + rcx]			; if (str[rbx] == base[rcx])
-	je add								; goto add
-	inc rcx								; else rcx++
+	cmp r8b, byte [rdi + rcx]			; if str[rbx] == base[rcx]
+	je add								; jump to add
+	inc rcx								; rcx++
 	cmp byte [rdi + rcx], 0				; if base[rcx] == 0
-	je end								; goto error
-	jmp loop_base						; else goto loop_base
+	je end								; jump to end
+	jmp loop_base						; jump to loop_base
 add:
-	mul r11								; result *= strlen(base)
-	add rax, rcx						; result += rcx
+	mul r11								; rax *= strlen(base)
+	add rax, rcx						; rax += rcx
 	xor rcx, rcx						; rcx = 0
 	inc rbx								; rbx++
 	cmp byte [r10 + rbx], 0				; if str[rbx] == 0
-	je end								; goto end
+	je end								; jump to end
 	mov r8b, byte [r10 + rbx]			; r8b = str[rbx]
-	jmp loop_base						; goto loop_base
+	jmp loop_base						; jump to loop_base
 end:
-	test r9b, 1							; if LSB of r9b (nb of '-') != 1 (if LSB == 1, nb of '-' is odd)
-	jz return							; goto return
-	neg rax								; else negate rax
+	test r9b, 1							; if r9 (number of '-') is odd
+	jz return							; jump to return
+	neg rax								; negate rax
 return:
 	ret									; return rax
 error:
