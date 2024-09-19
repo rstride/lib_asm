@@ -1,19 +1,25 @@
+; ssize_t ft_read(int fd, void *buf, size_t count)
+;	fd			->	rdi
+;	*buf		->	rsi
+;	count		->	rdx
+;	return val	->	rax
+
 global ft_read
+extern __errno_location
+
 section .text
-
 ft_read:
-    mov rax, 0          ; System call number for read (0)
-    mov rdi, rdi        ; File descriptor (first argument)
-    mov rsi, rsi        ; Buffer (second argument)
-    mov rdx, rdx        ; Number of bytes to read (third argument)
-    syscall             ; Invoke system call
-    cmp rax, 0          ; Check if syscall was successful
-    js .error           ; If there was an error (negative return), jump to error
-    ret                 ; Return number of bytes read
+	mov rax, 0				; rax = 0 (syscall sys_read)
+	syscall
+	cmp rax, 0				; if return of syscall < 0
+	jl error				; goto error
+	ret						; return syscall value
+error:
+	mov rbx, rax			; rbx = rax (errno)
+	neg rbx					; negate errno
+	call __errno_location	; rax = errno location
+	mov [rax], rbx			; *rax = rbx (errno)
+	mov rax, -1				; rax = -1
+	ret						; return -1
 
-.error:
-    mov rdi, rax        ; Set errno to the return value (negative error code)
-    neg rdi             ; Negate the error code
-    mov rax, 60         ; System call number for exit (60)
-    syscall             ; Exit the program with the error code
-    ret
+section .note.GNU-stack noalloc noexec nowrite progbits

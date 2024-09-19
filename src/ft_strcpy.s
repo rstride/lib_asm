@@ -1,23 +1,25 @@
+; char *ft_strcpy(char *dst, const *char src)
+;	*dst		->	rdi
+;	*src		->	rsi
+;	return val	->	rax
+
+global ft_strcpy
+
 section .text
-    global _ft_strcpy
-
-; rdi = dest, rsi = src
-
-_ft_strcpy:
-    push rdi                ; Save the destination pointer
-    jmp loop                ; Jump to loop
-
+ft_strcpy:
+	push rdi			; pushing rdi to the stack (to save the pointer address)
 loop:
-    cmp BYTE [rsi], 0       ; Compare src byte with 0
-    je exit                 ; If src byte is 0, jump to exit
-    mov al, [rsi]           ; Load byte from src into al
-    mov [rdi], al           ; Store byte into dest
-    inc rdi                 ; Increment dest pointer
-    inc rsi                 ; Increment src pointer
-    jmp loop                ; Repeat the loop
+	cmp byte [rsi], 0	; compare *rsi with 0
+	je return			; if *rsi == 0 goto return
+	mov cl, [rsi]		; copying *rsi into cl
+	mov [rdi], cl		; copying cl into *rdi
+	inc rdi				; rdi++
+	inc rsi				; rsi++
+	jmp loop			; goto loop
+return:
+	mov cl, 0			; copying 0 into cl
+	mov [rdi], cl		; copying cl into *rdi
+	pop rax				; poping the stack into rax (stack = initial saved ptr)
+	ret					; return rax
 
-exit:
-    mov BYTE [rdi], 0       ; Null-terminate the destination string
-    pop rax                 ; Restore the original destination pointer
-    mov rax, rdi            ; Set the return value to the destination pointer
-    ret                     ; Return
+section .note.GNU-stack noalloc noexec nowrite progbits

@@ -1,16 +1,18 @@
-section .text
+; size_t ft_strlen(const *char s)
+;	*s			->	rdi
+;	return val	->	rax
+
 global ft_strlen
 
+section .text
 ft_strlen:
-    ; Initialize counter to 0
-    xor rax, rax 
+	xor rax, rax			; rax = 0
+loop:
+	cmp byte [rdi + rax], 0	; compare *rdi with 0
+	je return				; if *rdi == 0 goto return
+	inc rax					; rax++
+	jmp loop				; goto loop
+return:
+	ret						; return rax
 
-    ; Loop through the string until null byte is found
-.loop:
-    cmp byte [rdi + rax], 0 ; Compare current byte with 0
-    je .end                 ; Jump to end if null byte is found
-    inc rax                  ; Increment counter
-    jmp .loop                ; Continue looping
-
-.end:
-    ret                      ; Return the length in rax
+section .note.GNU-stack noalloc noexec nowrite progbits
