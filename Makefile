@@ -16,7 +16,6 @@ CC = cc
 INCLUDES = inc
 
 CFLAGS = -f elf64
-LDFLAGS = -no-pie
 
 SRC_DIR = src/
 SRC_BONUS_DIR = src_bonus/
